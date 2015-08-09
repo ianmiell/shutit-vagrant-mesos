@@ -71,21 +71,21 @@ class mesos_vagrant(ShutItModule):
 		shutit.send('vagrant plugin install vagrant-cachier')
 		if not shutit.file_exists('vagrant-mesos',directory=True):
 			shutit.send('git clone https://github.com/everpeace/vagrant-mesos')
-			shutit.send('cd vagrant-mesos')
+			shutit.send('cd vagrant-mesos/standalone')
 			memavail = shutit.get_memory()
 			if memavail < mem_needed * 1000:
 				if not shutit.get_input('Memory available appears to be: ' + str(memavail) + 'kB, need ' + str(mem_needed * 1000) + 'kB available to run.\nIf you want to continue, input "y", else "n"',boolean=True):
 					shutit.fail('insufficient memory')
 			shutit.send('vagrant up')
 		else:
-			shutit.send('cd vagrant-mesos')
+			shutit.send('cd vagrant-mesos/standalone')
 			shutit.send('git pull')
 			if shutit.send_and_match_output('vagrant status',['.*running.*','.*saved.*','.*poweroff.*','.*not created.*','.*aborted.*']):
 				keep = shutit.get_input('A vagrant setup already exists here. Do you want me to start up the existing instance (y) or destroy it (n)?',boolean=True)
 				if not keep or shutit.send_and_match_output('vagrant status',['.*not created.*','.*aborted.*']):
 					shutit.send('vagrant destroy -f')
-					shutit.send('cd ..')
-					shutit.send('rm -rf origin')
+					shutit.send('cd ../..')
+					shutit.send('rm -rf vagrant-mesos')
 					self.build(shutit)
 					return True
 				if shutit.send_and_match_output('vagrant status',['.*running.*','.*saved.*','.*poweroff.*']):
